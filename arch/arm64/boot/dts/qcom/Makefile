@@ -602,6 +602,7 @@ dtb-$(CONFIG_MACH_SONY_BLANC)		+= msm8956-v1.1-loire-blanc_generic.dtb
 dtb-$(CONFIG_MACH_SONY_BLANC)		+= apq8056-v1.1-loire-blanc_windy.dtb
 dtb-$(CONFIG_MACH_SONY_BLANC)		+= msm8956-loire-blanc_generic.dtb
 dtb-$(CONFIG_MACH_SONY_BLANC)		+= apq8056-loire-blanc_windy.dtb
+dtb-$(CONFIG_MACH_LEECO_S2)		+= msm8956-s2.dtb
 endif
 endif
 

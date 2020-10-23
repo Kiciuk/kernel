@@ -1,0 +1,94 @@
+&pmi8950_torch0{
+qcom,current = <70>;
+};
+&pmi8950_torch1{
+qcom,current = <70>;
+};
+
+&wled{
+qcom,en-cabc;
+};
+
+&spmi_bus {
+	qcom,pmi8950@2 {
+				qcom,leds@a100 {
+						status = "okay";
+						qcom,led_mpp_2 {
+								label = "mpp";
+								linux,name = "button-backlight";
+								linux,default-trigger = "none";
+								qcom,default-state = "off";
+								qcom,max-current = <40>;
+								qcom,current-setting = <5>;
+								qcom,id = <6>;
+								qcom,mode = "manual";
+								qcom,source-sel = <1>;
+								qcom,mode-ctrl = <0x60>;
+						};
+				};
+		};
+};
+
+&ibb_regulator{
+	qcom,qpnp-ibb-discharge-resistor = <64>;
+};
+
+&qpnp_fg {
+	qcom,battery-data = <&s2_batterydata>;
+	qcom,hot-bat-decidegc = <500>;
+	qcom,warm-bat-decidegc = <450>;
+	qcom,cool-bat-decidegc = <150>;
+	qcom,cold-bat-decidegc = <(0)>;
+////////////////// what are these??????
+	qcom,cl-max-increment-deciperc = <0>;
+	qcom,cl-max-decrement-deciperc = <20>;
+	qcom,cl-max-start-capacity = <40>;
+////////////////
+	qcom,hold-soc-while-full;
+//////////////////
+	qcom,resume-soc-raw = <0xF3>;
+///////////////////
+	qcom,fg-chg-iterm-ma = <150>;
+	qcom,fg-iterm-ma = <300>;
+	qcom,thermal-coefficients = [da 86 f0 50 08 3c];
+	qcom,ext-sense-type;
+	qcom,fg-cutoff-voltage-mv = <3200>;
+///////////
+	qcom,vbat-estimate-diff-mv = <200>;
+	qcom,cl-vbat-est-thr-uv = <300000>;
+//////////////
+	qcom,fg-cc-cv-threshold-mv = <4390>;
+};
+
+&qpnp_smbcharger {
+	/delete-property/ qcom,parallel-usb-min-current-ma;
+qcom,battery-data = <&s2_batterydata>;
+qcom,parallel-usb-min-current-ma = <1400>;
+	/delete-property/ qcom,parallel-usb-9v-min-current-ma;
+ qcom,parallel-usb-9v-min-current-ma = <900>;
+	qcom,charge-unknown-battery;
+	qcom,usb_dp-vadc = <&pmi8950_vadc>;
+	qcom,usb_dm-vadc = <&pmi8950_vadc>;
+	qcom,usbin-vadc = <&pmi8950_vadc>;
+	qcom,float-voltage-mv = <4400>;
+/////////////
+	qcom,precharging-timeout-mins = <24>;
+	qcom,charging-timeout-mins = <768>;
+	qcom,bmd-pin-src = "bpd_none";
+////////////////
+
+	qcom,force-aicl-rerun;
+////////////////////
+	dpdm-supply = <&usb_otg>;
+	id_poll_enable;
+	id_poll_up_interval = <2000>;
+	id_poll_up_period = <50000>;
+	id_poll_pd_gpio = <&pm8950_gpios 8 0>;
+	id_poll_pd_invert = <1>;
+///////////////////
+};
+
+
+&labibb {
+	qcom,qpnp-labibb-mode = "lcd";
+};

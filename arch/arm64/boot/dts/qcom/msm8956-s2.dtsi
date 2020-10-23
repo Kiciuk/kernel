@@ -1,0 +1,519 @@
+/* arch/arm64/boot/dts/qcom/msm8956-loire-common.dtsi
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+/*
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2, as
+ * published by the Free Software Foundation.
+ */
+
+#include <dt-bindings/pinctrl/qcom,pmic-mpp.h>
+#include <dt-bindings/pinctrl/qcom,pmic-gpio.h>
+#include "msm8956-s2_pinctrl.dtsi"
+#include "msm8956-pmi8950-s2.dtsi"
+#include "msm8956-pm8950-s2.dtsi"
+#include "s2-panel-boe-nt35596s-1080p-5p5boe-vdo.dtsi"
+#include "msm8956-camera-s2.dtsi"
+#include "msm8956-v1.1.dtsi"
+/* Disable SMP2P Remote Debug for production */
+#include "msm-rdbg-disable.dtsi"
+
+#define PM8004_MPP_MSMIO	0
+#define PMI8950_MPP_MSMIO	0
+#define PM8950_MPP_VPH		0
+#define PM8950_MPP_1P8		2
+#define PM8950_MPP_L5		3
+
+/ {
+	reserved-memory {
+
+		ramoops {
+			compatible = "removed-dma-pool", "ramoops";
+			no-map;
+			reg = <0 0x9ff00000 0 0x00100000>;
+			status = "ok";
+			record-size = <0x20000>;
+			console-size = <0x40000>;
+			ftrace-size = <0x20000>;
+			pmsg-size = <0x20000>;
+			ecc-size = <16>;
+		};
+		/delete-node/ &other_ext_mem;
+		other_ext_mem: other_ext_region@84A00000 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0x0 0x84A00000 0x0 0x1E00000>;
+			label = "other_ext_mem";
+		};
+		/delete-node/ &cont_splash_mem;
+		cont_splash_mem: splash_region@82000000 {
+			reg = <0x0 0x82000000 0x0 0x2800000>;
+		};
+	};
+
+	firmware: firmware {
+		android {
+			compatible = "android,firmware";
+			fstab {
+				compatible = "android,fstab";
+				vendor {
+                                        compatible = "android,vendor";
+                                        dev = "/dev/block/platform/soc.0/7824900.sdhci/by-name/vendor";
+                                        type = "ext4";
+                                        mnt_flags = "ro,barrier=1";
+                                        fsmgr_flags = "wait";
+                                        status = "ok";
+                                };
+				system {
+					compatible = "android,system";
+					dev = "/dev/block/platform/soc/7824900.sdhci/by-name/system";
+					type = "ext4";
+					mnt_flags = "ro,barrier=1";
+					fsmgr_flags = "wait,verify";
+					status = "ok";
+				};
+			};
+		};
+	};
+};
+
+
+&soc {
+	pinctrl@1000000 {
+		disabled-pins = <0 1 2 3 8 9 10 11>;
+	///maybe more!!!
+	};
+
+	goodix_gf318m {
+		#address-cells = <2>;
+		#size-cells = <2>;
+
+		compatible = "goodix,fingerprint";
+		reg = <0x0 0x0 0x0 0x0>;
+		status = "disabled";
+		input-device-name = "gf318m";
+		interrupt-parent = <&msm_gpio>;
+		interrupts = <106 0>;
+
+		vcc_spi-supply  = <&pm8950_l10>;
+		vdd_ana-supply  = <&pm8950_l10>;
+		vdd_io-supply   = <&pm8950_l10>;
+		qcom,vdd_ana-always-on;
+
+		goodix,gpio_reset = <&msm_gpio 110 0x00>;
+		goodix,gpio_irq = <&msm_gpio 106 0x00>;
+
+		pinctrl-names = "goodix_irq_active";
+		pinctrl-0 = <&goodix_irq_active>;
+	};
+
+	/* SPI : BLSP1 */
+	spi@0x78B5000 { /* BLSP1 QUP0 */
+		status = "disabled";
+// leeco might have something here
+
+
+	};
+
+	/* HS UART : BLSP2 -not on leeco */
+
+	/* SPI : BLSP3 */
+	/* Kernel default setting will be overridden by ADSP SW. */
+
+	/* I2C : BLSP5 */
+	/* Kernel default setting will be overridden by ADSP SW. */
+
+
+	sound-9335 {
+	status = "disabled";
+	};
+
+	qcom,wdt@b017000 {
+		qcom,bark-time = <25000>;
+		qcom,pet-time = <20000>;
+	};
+
+	gpio_keys {
+		compatible = "gpio-keys";
+		input-name = "gpio-keys";
+		label = "gpio-keys";
+
+		vol_up {
+			label = "volume_up";
+			gpios = <&msm_gpio 113 0x1>;
+			linux,input-type = <1>;
+			linux,code = <115>;
+			gpio-key,wakeup;
+			debounce-interval = <15>;
+		};
+	
+	};
+
+
+	qcom,cpp@1b04000 {
+		qcom,min-clock-rate = <160000000>;
+	};
+
+	
+	/delete-node/ qseecom@85e00000;
+	qcom_seecom: qseecom@84A00000 {
+		compatible = "qcom,qseecom";
+		reg = < 0x84a00000 0x1900000 >;
+		reg-names = "secapp-region";
+		qcom,hlos-num-ce-hw-instances = <1>;
+		qcom,hlos-ce-hw-instance = <0>;
+		qcom,qsee-ce-hw-instance = <0>;
+		qcom,msm-bus,name = "qseecom-noc";
+		qcom,disk-encrypt-pipe-pair = <2>;
+		qcom,support-fde;
+		qcom,appsbl-qseecom-support;
+		qcom,msm-bus,num-cases = <4>;
+		qcom,msm-bus,num-paths = <1>;
+		qcom,support-bus-scaling;
+		qcom,msm-bus,vectors-KBps =
+			<55 512 0 0>,
+			<55 512 0 0>,
+			<55 512 120000 1200000>,
+			<55 512 393600 3936000>;
+		clocks = <&clock_gcc CRYPTO_CLK_SRC>,
+			 <&clock_gcc GCC_CRYPTO_CLK>,
+			 <&clock_gcc GCC_CRYPTO_AHB_CLK>,
+			 <&clock_gcc GCC_CRYPTO_AXI_CLK>;
+		clock-names = "core_clk_src", "core_clk",
+				"iface_clk", "bus_clk";
+		qcom,ce-opp-freq = <100000000>;
+	};
+
+
+	qcom,mpm2-sleep-counter@4a3000 {
+		compatible = "qcom,mpm2-sleep-counter";
+		reg = <0x4a3000 0x1000>;
+		clock-frequency = <32768>;
+	};
+};
+///done till tat
+
+&dsi_panel_pwr_supply{
+	qcom,panel-supply-entry@3 {
+		qcom,supply-pre-off-sleep = <5>;
+	};
+};
+
+
+/{
+	s2_batterydata: qcom,battery-data {
+		qcom,batt-id-range-pct = <15>;
+		/delete-node/ qcom,itech-3000mah-4200mv;
+		/delete-node/ qcom,itech-3000mah;
+		#include "s2_3000mAh_Jan18th2016_PMI8952.dtsi"
+
+	};
+};
+
+
+/* Regulator config */
+/* pm8950_s1 */
+/* Follow QTI */
+
+/* pm8950_s2 */
+/* Follow QTI */
+
+/* pm8950_s3 */
+/* Follow QTI */
+
+/* pm8950_s4 */
+/* Follow QTI */
+
+/* pm8950_s5 */
+/* Follow QTI */
+
+/* pm8950_s6 */
+/* Follow QTI */
+
+/* pm8950_l1 */
+/* Follow QTI */
+
+/* pm8950_l2 */
+/* Follow QTI */
+
+/* pm8950_l3 */
+/* Follow QTI */
+
+/* pm8950_l4 */
+/* Follow QTI */
+
+/* pm8950_l5 */
+/* Follow QTI */
+
+/* pm8950_l6 */
+/* Follow QTI */
+
+/* pm8950_l7 */
+/* Follow QTI */
+
+/* pm8950_l8 */
+/* Follow QTI */
+
+/* pm8950_l9 */
+/* Follow QTI */
+
+/* pm8950_l10 */
+/* Follow QTI */
+
+
+/* pm8950_l11 */
+/* Follow QTI */
+
+/* pm8950_l12 */
+/* Follow QTI */
+
+/* pm8950_l13 */
+/* Follow QTI */
+
+/* pm8950_l14 */
+/* Follow QTI */
+
+/* pm8950_l15 */
+/* Follow QTI */
+
+/* pm8950_l16 */
+/* Follow QTI */
+
+&pm8950_l17 {
+	regulator-min-microvolt = <2500000>;
+	regulator-max-microvolt = <2900000>;
+	qcom,init-voltage = <2700000>;
+	qcom,init-enable = <0>;
+	qcom,init-ldo-mode = <1>;
+	qcom,init-pin-ctrl-enable = <0>;
+	qcom,init-pin-ctrl-mode = <0>;
+	status = "okay";
+};
+
+/* pm8950_l18 */
+/* Follow QTI */
+
+/* pm8950_l19 */
+/* Follow QTI */
+
+/* pm8950_l20 */
+/* Follow QTI */
+
+/* pm8950_l21 */
+/* Follow QTI */
+
+/* pm8950_l22 */
+/* Follow QTI */
+
+&pm8950_l23 {
+	regulator-min-microvolt = <1200000>;
+	regulator-max-microvolt = <1200000>;
+	qcom,init-voltage = <1200000>;
+	qcom,init-enable = <0>;
+	qcom,init-ldo-mode = <1>;
+	qcom,init-pin-ctrl-enable = <0>;
+	qcom,init-pin-ctrl-mode = <0>;
+	status = "okay";
+};
+
+/* pmi8950_VSW_WLED */
+/* Follow QTI */
+
+/* pmi8950_FLASH_OUT */
+/* Follow QTI */
+
+/* pm8004_s2 */
+/* Follow QTI */
+
+/* pm8004_s5 */
+/* Follow QTI */
+
+/* pm8004_VREG_L1 */
+/* Follow QTI */
+
+
+
+&sdhc_1 {
+	vdd-supply = <&pm8950_l8>;
+	qcom,vdd-voltage-level = <2900000 2900000>;
+	qcom,vdd-current-level = <200 570000>;
+
+	vdd-io-supply = <&pm8950_l5>;
+	qcom,vdd-io-always-on;
+	qcom,vdd-io-lpm-sup;
+	qcom,vdd-io-voltage-level = <1800000 1800000>;
+	qcom,vdd-io-current-level = <200 325000>;
+
+	pinctrl-names = "active", "sleep";
+	pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on &sdc1_rclk_on>;
+	pinctrl-1 = <&sdc1_clk_off &sdc1_cmd_off &sdc1_data_off &sdc1_rclk_off>;
+
+	qcom,nonremovable;
+	status = "ok";
+};
+
+
+&usb_otg {
+	qcom,hsusb-otg-phy-init-seq =
+			<0x73 0x80 0x0a 0x81 0x3f 0x82 0x33 0x83 0xffffffff>;
+};
+
+
+/* I2C : BLSP2 */
+&i2c_2 {
+	smb1351-charger@1d {
+		compatible = "qcom,smb1351-charger";
+		reg = <0x1d>;
+		qcom,parallel-en-pin-polarity = <1>;
+		qcom,parallel-charger;
+		qcom,float-voltage-mv = <4400>;
+		qcom,recharge-mv = <100>;
+	};
+};
+
+&i2c_4 {
+	synaptics_dsx@4b {
+                compatible = "synaptics,dsx-i2c";
+                reg = <0x4b>;
+                interrupt-parent = <&msm_gpio>;
+                interrupts = <65 0x2>;
+                vdd_ana-supply = <&pm8950_l17>;
+                vcc_i2c-supply = <&pm8950_l6>;
+                synaptics,pwr-reg-name = "vdd_ana";
+                synaptics,bus-reg-name = "vcc_i2c";
+                pinctrl-names = "pmx_ts_active","pmx_ts_suspend";
+                pinctrl-0 = <&ts_int_active &ts_reset_active>;
+                pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+                synaptics,irq-gpio = <&msm_gpio 65 0>;
+                synaptics,irq-on-state = <0>;
+                synaptics,irq-flags = <0x2008>; /* IRQF_ONESHOT | IRQF_TRIGGER_LOW */
+                synaptics,reset-gpio = <&msm_gpio 64 0>;
+                synaptics,reset-on-state = <0>;
+                synaptics,reset-active-ms = <20>;
+                synaptics,power-delay-ms = <200>;
+                synaptics,reset-delay-ms = <100>;
+                synaptics,cap-button-codes=<139 102 158>;
+                //synaptics,max-y-for-2d = <800>; /* remove if no virtual buttons */
+                //synaptics,vir-button-codes = <102 100 900 100 60 158 300 900 100 60>;
+		};
+};
+/* I2C : BLSP6(NFC) */
+&i2c_6 {
+	/delete-node/ nq@2b;
+};
+
+/* I2C : BLSP8 */
+&i2c_8 {
+
+ 	aw2013@45 {
+                        compatible = "awinic,aw2013";
+                        reg = <0x45>;
+                        vdd-supply = <&pm8950_l10>;
+                        vcc-supply = <&pm8950_l5>;
+
+                       aw2013,green {
+						aw2013,name = "green";
+						aw2013,id = <0>;
+						aw2013,max-brightness = <255>;
+						aw2013,max-current = <1>;
+						aw2013,rise-time-ms = <2>;
+						aw2013,hold-time-ms = <4>;
+						aw2013,fall-time-ms = <2>;
+						aw2013,off-time-ms = <3>;
+				};
+
+				aw2013,red {
+						aw2013,name = "red";
+						aw2013,id = <1>;
+						aw2013,max-brightness = <255>;
+						aw2013,max-current = <1>;
+						aw2013,rise-time-ms = <2>;
+						aw2013,hold-time-ms = <4>;
+						aw2013,fall-time-ms = <2>;
+						aw2013,off-time-ms = <3>;
+				};
+
+				aw2013,blue {
+						aw2013,name = "blue";
+						aw2013,id = <2>;
+						aw2013,max-brightness = <255>;
+						aw2013,max-current = <1>;
+						aw2013,rise-time-ms = <2>;
+						aw2013,hold-time-ms = <4>;
+						aw2013,fall-time-ms = <2>;
+						aw2013,off-time-ms = <3>;
+				};
+                };
+	
+};
+
+/*
+&mdss_fb0 {
+	/delete-property/ qcom,mdss-fb-splash-logo-enabled;
+};
+
+&mdss_mdp {
+	qcom,mdss-pref-prim-intf = "dsi";
+};
+
+&mdss_fb0 {
+	 /delete-property/ qcom,mdss-fb-splash-logo-enabled;
+};
+
+&mdss_dsi {
+	hw-config = "split_dsi";
+};
+*/
+
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_boe_nt35596s_fhd_cmd>;
+	pinctrl-names = "mdss_default", "mdss_sleep";
+	pinctrl-0 = <&mdss_dsi_active &mdss_te_active>;
+	pinctrl-1 = <&mdss_dsi_suspend &mdss_te_suspend>;
+
+	qcom,platform-reset-gpio = <&msm_gpio 25 0>;
+	/delete-property/ qcom,platform-bklight-en-gpio;
+	/delete-property/ qcom,panel-mode-gpio;
+};
+
+&mdss_dsi1 {
+	status = "disabled";
+};
+
+&vfe0 {
+	max-clk-turbo = <460000000>;
+};
+
+&vfe1 {
+	max-clk-turbo = <460000000>;
+};
+
+&spmi_bus {
+	pm8004@4 {
+		qcom,leds@a100 {
+			status = "disabled";
+		};
+		qcom,leds@a300 {
+			status = "disabled";
+		};
+	};
+
+};
+
+&sdhc_2 {
+	status = "disabled";
+};
+
+&sdhc_3 {
+status = "disabled";	
+};
