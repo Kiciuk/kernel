@@ -396,6 +396,14 @@ config MACH_SONY_SUZU
 	  If you enable this config,
 	  please use SONY Mobile device tree.
 
+
+config MACH_LEECO_S2
+	bool "Leeco S2"
+	depends on ARCH_SONY_LOIRE
+	help
+	  Support for the Leeco S2 device.
+	  
+
 config MACH_SONY_KUGO
 	bool "Sony Mobile KUGO"
 	depends on ARCH_SONY_LOIRE
