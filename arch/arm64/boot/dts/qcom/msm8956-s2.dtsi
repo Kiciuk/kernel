@@ -19,12 +19,13 @@
 
 #include <dt-bindings/pinctrl/qcom,pmic-mpp.h>
 #include <dt-bindings/pinctrl/qcom,pmic-gpio.h>
-#include "msm8956-s2_pinctrl.dtsi"
+#include "msm8956-v1.1.dtsi"
+#include "msm8956-s2-pinctrl.dtsi"
+#include "msm8956-s2-audio.dtsi"
 #include "msm8956-pmi8950-s2.dtsi"
 #include "msm8956-pm8950-s2.dtsi"
 #include "s2-panel-boe-nt35596s-1080p-5p5boe-vdo.dtsi"
 #include "msm8956-camera-s2.dtsi"
-#include "msm8956-v1.1.dtsi"
 /* Disable SMP2P Remote Debug for production */
 #include "msm-rdbg-disable.dtsi"
 
@@ -48,14 +49,16 @@
 			pmsg-size = <0x20000>;
 			ecc-size = <16>;
 		};
-		/delete-node/ &other_ext_mem;
+
+		/delete-node/ other_ext_region@85e00000;
+
 		other_ext_mem: other_ext_region@84A00000 {
 			compatible = "removed-dma-pool";
 			no-map;
 			reg = <0x0 0x84A00000 0x0 0x1E00000>;
 			label = "other_ext_mem";
 		};
-		/delete-node/ &cont_splash_mem;
+		/delete-node/ splash_region@83000000;
 		cont_splash_mem: splash_region@82000000 {
 			reg = <0x0 0x82000000 0x0 0x2800000>;
 		};
@@ -132,11 +135,6 @@
 
 	/* I2C : BLSP5 */
 	/* Kernel default setting will be overridden by ADSP SW. */
-
-
-	sound-9335 {
-	status = "disabled";
-	};
 
 	qcom,wdt@b017000 {
 		qcom,bark-time = <25000>;

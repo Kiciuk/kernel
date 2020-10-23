@@ -1,7 +1,5 @@
 /*  Date            Author    	     Why              jira
 */
-TODO CLOCK NAMES
-
 &soc {
 	led_flash0: qcom,camera-flash {
 		cell-index = <0>;
