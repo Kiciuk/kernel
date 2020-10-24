@@ -127,7 +127,9 @@
 
 
 	};
-
+&tsens{
+qcom,slope = <3200 3200 3200 3200 3200 3200 3200 3200 3200 3200 3200>;
+};
 	/* HS UART : BLSP2 -not on leeco */
 
 	/* SPI : BLSP3 */
